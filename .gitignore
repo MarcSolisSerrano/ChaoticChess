@@ -31,6 +31,11 @@
 *.out
 *.app
 
+### CLion ###
+
+[Cc]haoticChess/.idea/
+[Cc]haoticChess/[Gg]enerator/.idea/
+
 ### VisualStudio ###
 ## Ignore Visual Studio temporary files and build results
 
@@ -46,10 +51,13 @@
 [Rr]eleases/
 x64/
 x86/
-build/
+[Bb]uild/
 bld/
 [Bb]in/
 [Oo]bj/
+
+[Cc]haoticChess/[Bb]uilds/
+[Cc]haoticChess/[Ss]olution/
 
 # Visual C++ cache files
 **/.vs/
