@@ -1,8 +1,9 @@
 #pragma once
 #include <cstdint>
+#include <format>
 #include <limits>
 
-#include "ChaoticChess/Utils/TypeMeasure.h"
+#include "ChaoticChess/Utils/TypeOperations.h"
 
 
 namespace Board
@@ -14,26 +15,27 @@ namespace Board
 
 		static const Coordinate Invalid;
 
-		friend constexpr bool operator==(const Coordinate& lhs, const Coordinate& rhs);
-		friend constexpr bool operator!=(const Coordinate& lhs, const Coordinate& rhs);
+		friend constexpr bool operator==(const Coordinate& lhs, const Coordinate& rhs) noexcept;
+		friend constexpr bool operator!=(const Coordinate& lhs, const Coordinate& rhs) noexcept;
 		friend constexpr bool operator<(const Coordinate& lhs, const Coordinate& rhs);
 	};
 
-
-	constexpr bool operator==(const Board::Coordinate& lhs, const Board::Coordinate& rhs)
+	constexpr bool operator==(const Coordinate& lhs, const Coordinate& rhs) noexcept
 	{
 		return lhs.x == rhs.x && lhs.y == rhs.y;
 	}
 
-	constexpr bool operator!=(const Board::Coordinate& lhs, const Board::Coordinate& rhs)
+	constexpr bool operator!=(const Coordinate& lhs, const Coordinate& rhs) noexcept
 	{
 		return !(lhs == rhs);
 	}
 
-	constexpr bool operator<(const Board::Coordinate& lhs, const Board::Coordinate& rhs)
+	constexpr bool operator<(const Coordinate& lhs, const Coordinate& rhs)
 	{
-		return (static_cast<uint16_t>(lhs.x) << Utils::BitsSizeOf<decltype(Coordinate().y)>() | static_cast<uint16_t>(lhs.y)) < (static_cast<uint16_t>(rhs.x) << 8 | static_cast<uint16_t>(rhs.y));
+		using type = Utils::RawType<sizeof(lhs.x) + sizeof(rhs.y)>::type;
+
+		return (static_cast<type>(lhs.x) << Utils::BitsSizeOf<decltype(lhs.y)>() | static_cast<type>(lhs.y)) <
+			(static_cast<type>(rhs.x) << Utils::BitsSizeOf<decltype(rhs.y)>() | static_cast<type>(rhs.y));
 	}
 
 }
-
