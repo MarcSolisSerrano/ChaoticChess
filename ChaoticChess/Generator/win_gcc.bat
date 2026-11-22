@@ -3,7 +3,7 @@ setlocal
 
 REM Compute paths
 set SOURCE_DIR=%~dp0
-set BUILD_DIR=%SOURCE_DIR%\..\Solution\MinGW
+set BUILD_DIR=%SOURCE_DIR%\..\Solutions\MinGW
 
 echo Source dir: %SOURCE_DIR%
 echo Build dir: %BUILD_DIR%

@@ -1,26 +1,62 @@
 
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.20)
 
 include("Utilities.cmake")
 
+#Set paths
+cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH ROOT_DIR)
 
-get_filename_component(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
+cmake_path(GET ROOT_DIR FILENAME ProjectId)
+string(REPLACE " " "_" ProjectId ${ProjectId})
+
 set(SOURCE_DIR ${ROOT_DIR}/Source)
 set(CODE_DIR ${SOURCE_DIR}/Code)
-get_filename_component(MAIN_PROJECT_NAME "${ROOT_DIR}" NAME)
+set(TEST_DIR ${SOURCE_DIR}/Test)
+set(BUILDING_PROJECT_NAME ${ProjectId})
 
-message(STATUS "ROOT = ${ROOT_DIR}")
-message(STATUS "NAME = ${MAIN_PROJECT_NAME}")
-message(STATUS "Source = ${SOURCE_DIR}")
 
-project(${MAIN_PROJECT_NAME})
+#Optional params
+option(TEST "Generate test project" OFF)
 
-AddLibraryToCurrentProject(${ROOT_DIR} "${CODE_DIR}")
-set_target_properties(${MAIN_PROJECT_NAME} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
-SetLibraryCppStandard(${MAIN_PROJECT_NAME} 20)
+if(TEST)
+	set(BUILDING_PROJECT_NAME "${BUILDING_PROJECT_NAME}_Test")
+	message(Building " ${BUILDING_PROJECT_NAME}")
 
+	GetProjectExternalPath("${ROOT_DIR}" EXTERNAL_DIR)
+	set(GOOGLETEST_SOURCE_DIR "${EXTERNAL_DIR}/GoogleTest")
+	set(GOOGLETEST_BINARY_DIR "${CMAKE_BINARY_DIR}/external/GoogleTest-build")
+
+	if (MSVC)
+	  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")  # /MD
+	  # Use MultiThreadedDebugDLL for Debug config
+	endif()
+
+	#Generate GoogleTest Project
+	project(${BUILDING_PROJECT_NAME})
+	set(gtest_force_shared_crt on)
+	add_subdirectory(${GOOGLETEST_SOURCE_DIR} ${GOOGLETEST_BINARY_DIR})
+	AddLibraryToCurrentTestProject(${ROOT_DIR} "${SOURCE_DIR}")
+	SetLibraryCppStandard(${BUILDING_PROJECT_NAME} 20)
+else()
+	message(Building " ${BUILDING_PROJECT_NAME}")
+	#Generate Main Project
+	project(${BUILDING_PROJECT_NAME})
+	AddLibraryToCurrentProject(${ROOT_DIR} "${CODE_DIR}")
+	SetLibraryCppStandard(${BUILDING_PROJECT_NAME} 20)
+endif()
+
+
+#Validate target architecture 
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(FATAL_ERROR
+        "ChaoticChess requires a 64-bit (x64) compiler and toolchain."
+    )
+endif()
+
+
+#Set options
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-	target_compile_options(${MAIN_PROJECT_NAME} PUBLIC $<$<CXX_COMPILER_ID:MSVC>:/bigobj>)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	set_target_properties(${MAIN_PROJECT_NAME} PROPERTIES CMAKE_XCODE_SCHEME_ADDRESS_SANITIZER ON)
+	SetCompileOptionsMSVC(${BUILDING_PROJECT_NAME})
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+	SetCompileOptionsGNU(${BUILDING_PROJECT_NAME})
 endif()
