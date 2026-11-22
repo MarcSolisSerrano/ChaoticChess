@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include <format>
 #include <limits>
 
 #include "ChaoticChess/Utils/TypeOperations.h"
@@ -38,4 +37,24 @@ namespace Board
 			(static_cast<type>(rhs.x) << Utils::BitsSizeOf<decltype(rhs.y)>() | static_cast<type>(rhs.y));
 	}
 
+}
+
+namespace std
+{
+	inline void HashCombine(std::size_t& seed, std::size_t value) noexcept
+	{
+		seed ^= value + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	}
+
+	template<>
+	struct hash<Board::Coordinate>
+	{
+		constexpr size_t operator()(const Board::Coordinate& coordinate) noexcept
+		{
+			size_t seed{ 0 };
+			HashCombine(seed, std::hash<decltype(coordinate.x)>{}(coordinate.x));
+			HashCombine(seed, std::hash<decltype(coordinate.y)>{}(coordinate.y));
+			return seed;
+		}
+	};
 }
