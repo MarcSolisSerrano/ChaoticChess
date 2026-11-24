@@ -46,14 +46,6 @@ else()
 endif()
 
 
-#Validate target architecture 
-if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
-    message(FATAL_ERROR
-        "ChaoticChess requires a 64-bit (x64) compiler and toolchain."
-    )
-endif()
-
-
 #Set options
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	SetCompileOptionsMSVC(${BUILDING_PROJECT_NAME})

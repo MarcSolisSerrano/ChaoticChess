@@ -105,16 +105,16 @@ function(GetProjectExternalPath full_path out_external_path)
 	set(result "")
 
  	while(TRUE)
-        # Check whether this directory contains an External folder
+        #Check whether this directory contains an "External" folder
         if(IS_DIRECTORY "${current_path}/External")
             set(result "${current_path}/External")
             break()
         endif()
 
-        # Move one directory up
+        #Move one directory up
         get_filename_component(parent_path "${current_path}" DIRECTORY)
 
-        # Stop if we reached the filesystem root
+        #Stop if we reached the filesystem root
         if("${parent_path}" STREQUAL "${current_path}")
             break()
         endif()
