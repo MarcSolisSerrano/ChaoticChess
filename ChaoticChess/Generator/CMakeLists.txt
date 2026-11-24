@@ -2,6 +2,7 @@
 cmake_minimum_required (VERSION 3.20)
 
 include("Utilities.cmake")
+include(FetchContent) # Include FetchContent module
 
 #Set paths
 cmake_path(GET CMAKE_CURRENT_SOURCE_DIR PARENT_PATH ROOT_DIR)
@@ -23,18 +24,27 @@ if(TEST)
 	message(Building " ${BUILDING_PROJECT_NAME}")
 
 	GetProjectExternalPath("${ROOT_DIR}" EXTERNAL_DIR)
-	set(GOOGLETEST_SOURCE_DIR "${EXTERNAL_DIR}/GoogleTest")
-	set(GOOGLETEST_BINARY_DIR "${CMAKE_BINARY_DIR}/external/GoogleTest-build")
+	#Set WHERE FetchContent downloads dependencies
+	set(FETCHCONTENT_BASE_DIR "${EXTERNAL_DIR}")
 
-	if (MSVC)
-	  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")  # /MD
-	  # Use MultiThreadedDebugDLL for Debug config
-	endif()
+	#Declare GoogleTest dependency
+	FetchContent_Declare(
+		googletest
+		GIT_REPOSITORY https://github.com/google/googletest.git
+		GIT_TAG        52eb8108c5bdec04579160ae17225d66034bd723 # release-1.17.0
+	)
 
 	#Generate GoogleTest Project
 	project(${BUILDING_PROJECT_NAME})
+
+	if (MSVC)
+		# Use MultiThreadedDebugDLL for Debug config
+		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")  # /MD
+		set(gtest_force_shared_crt ON CACHE BOOL "Use shared CRT for GoogleTest" FORCE)
+	endif()
+
 	set(gtest_force_shared_crt on)
-	add_subdirectory(${GOOGLETEST_SOURCE_DIR} ${GOOGLETEST_BINARY_DIR})
+	FetchContent_MakeAvailable(googletest)	#Adds googletests to the build
 	AddLibraryToCurrentTestProject(${ROOT_DIR} "${SOURCE_DIR}")
 	SetLibraryCppStandard(${BUILDING_PROJECT_NAME} 20)
 else()
