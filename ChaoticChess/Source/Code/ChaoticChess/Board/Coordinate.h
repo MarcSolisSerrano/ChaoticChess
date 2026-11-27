@@ -41,7 +41,7 @@ namespace Board
 
 namespace std
 {
-	inline void HashCombine(std::size_t& seed, std::size_t value) noexcept
+	constexpr void HashCombine(std::size_t& seed, std::size_t value) noexcept
 	{
 		seed ^= value + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 	}
