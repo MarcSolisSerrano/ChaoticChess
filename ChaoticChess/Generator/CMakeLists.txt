@@ -45,6 +45,10 @@ if(TEST)
 
 	set(gtest_force_shared_crt on)
 	FetchContent_MakeAvailable(googletest)	#Adds googletests to the build
+	EnableAddressSanitizer(gtest)
+    EnableAddressSanitizer(gmock)
+    EnableAddressSanitizer(gtest_main)
+    EnableAddressSanitizer(gmock_main)
 	AddLibraryToCurrentTestProject(${ROOT_DIR} "${SOURCE_DIR}")
 	SetLibraryCppStandard(${BUILDING_PROJECT_NAME} 20)
 else()

@@ -86,19 +86,48 @@ function(SetCompileOptionsMSVC project_name)
 	target_compile_options(${project_name} PRIVATE /WX)	#Enable Warnings as errors
 
 	#Enable Address sanitizer on Debug
-	target_compile_options(${project_name} PRIVATE "$<$<CONFIG:Debug>:/fsanitize=address>")
+	EnableAddressSanitizerMSVC(${project_name})
+
+    target_link_options(${project_name} PRIVATE		#Incremental is incompatible with Adress Sanitizer
+        "$<$<CONFIG:Debug>:/INCREMENTAL:NO>"
+    )
 endfunction()
 
 function(SetCompileOptionsGNU project_name)
 	target_compile_options(${project_name} PRIVATE -Werror)	#Enable Warnings as errors
 
 	#Enable Address sanitizer on Debug
-	target_compile_options(${project_name} PRIVATE
+	EnableAddressSanitizerGNU(${project_name})
+endfunction()
+
+#On Debug only
+function(EnableAddressSanitizer target_name)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    	EnableAddressSanitizerMSVC(${target_name})
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    	EnableAddressSanitizerGNU(${target_name})
+	endif()
+endfunction()
+
+#Enable Address sanitizer on Debug (MSVC)
+function(EnableAddressSanitizerMSVC target_name)
+    target_compile_options(${target_name} PRIVATE
+        "$<$<CONFIG:Debug>:/fsanitize=address>"
+    )
+endfunction()
+
+#Enable Address sanitizer on Debug (CLANG/GCC)
+function(EnableAddressSanitizerGNU target_name)
+    target_compile_options(${target_name} PRIVATE
         "$<$<CONFIG:Debug>:-fsanitize=address>"
         "$<$<CONFIG:Debug>:-fno-omit-frame-pointer>"
     )
-    target_link_options(${project_name} PRIVATE "$<$<CONFIG:Debug>:-fsanitize=address>")
+
+    target_link_options(${target_name} PRIVATE
+        "$<$<CONFIG:Debug>:-fsanitize=address>"
+    )
 endfunction()
+
 
 function(GetProjectExternalPath full_path out_external_path)
 	get_filename_component(current_path "${full_path}" ABSOLUTE)
